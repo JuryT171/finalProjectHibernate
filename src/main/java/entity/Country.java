@@ -1,8 +1,9 @@
-package Entity;
+package entity;
 
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Entity
 @Table(schema = "world", name = "country")

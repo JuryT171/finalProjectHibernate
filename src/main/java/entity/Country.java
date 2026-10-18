@@ -189,4 +189,12 @@ public class Country {
     public void setCity(City city) {
         this.city = city;
     }
+
+    public Set<CountryLanguage> getLanguages() {
+        return languages;
+    }
+
+    public void setLanguages(Set<CountryLanguage> languages) {
+        this.languages = languages;
+    }
 }

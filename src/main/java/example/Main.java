@@ -71,7 +71,7 @@ public class Main {
 
         main.shutdown();
     }
-
+    // загружаем из MySQL все города,их страны,языки и вернуть готовые DTO, пока сессия открыта
     private List<CityCountry> fetchData() {
         long t0 = System.currentTimeMillis(); // время старта
         List<CityCountry> result;
@@ -96,7 +96,7 @@ public class Main {
         return result;
     }
 
-    //превращаем entity плоский DTO, пока сессия открыта
+    //превращаем entity в DTO, пока сессия открыта
     private List<CityCountry> transformData(List<City> allCities) {
         List<CityCountry> preparedData = new ArrayList<>();
         for (City city : allCities) { // копируем поля из entity в DTO
@@ -168,10 +168,10 @@ public class Main {
 
     private void shutdown() {
         if (nonNull(sessionFactory)) {
-            sessionFactory.close();
+            sessionFactory.close();  //закрыть пул соединений с MySQL
         }
         if (nonNull(redisClient)) {
-            redisClient.shutdown();
+            redisClient.shutdown(); //закрыть пул соединений с redis
         }
     }
 }

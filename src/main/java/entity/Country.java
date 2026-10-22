@@ -20,6 +20,7 @@ public class Country {
     private String name;
 
     @Column(name = "continent")
+    //в БД continent хранится как целое число, Hibernate переводит число в константу enum по её позиции
     @Enumerated(EnumType.ORDINAL)
     private Continent continent;
 
@@ -40,7 +41,7 @@ public class Country {
     private BigDecimal GNP;
 
     @Column(name = "gnpo_id")
-    private BigDecimal GNPOId;
+    private BigDecimal GNPOId; // более точный, чем double
 
     @Column(name = "local_name")
     private String localName;
@@ -51,15 +52,16 @@ public class Country {
     @Column(name = "head_of_state")
     private String headOfState;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY) // у страны одна столица
     @JoinColumn(name = "capital")
     private City city;
 
+    // у страны много языков
+    /* сразу загружаем все языки,
+    FK country_id лежит в таблице country_language,а не тут.Владелец — CountryLanguage.country */
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "country")
     private Set<CountryLanguage> languages;
-
-
-    //Getters and Setters omitted
+    // коллекция языков страны, собранная по FK CountryCode.
 
 
     public Integer getId() {

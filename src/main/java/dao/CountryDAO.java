@@ -15,6 +15,7 @@ public class CountryDAO {
 
     public List<Country> getAll() {
         Query<Country> query = sessionFactory.getCurrentSession().createQuery(
+                // вытягиваем страны сразу вместе с их языками одним запросом, без повторов
                 "select distinct c from Country c left join fetch c.languages",
                 Country.class);
         return query.getResultList();

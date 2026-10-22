@@ -19,6 +19,7 @@ public class CountryLanguage {
 
     private String language;
 
+    // подсказываем hibernate что это булеан(BIT)
     @Column(name = "is_official", columnDefinition = "BIT")
     @Type(type = "org.hibernate.type.NumericBooleanType")
     private Boolean isOfficial;

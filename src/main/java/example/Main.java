@@ -26,8 +26,8 @@ import static java.util.Objects.nonNull;
 
 public class Main {
 
-    private final SessionFactory sessionFactory;
-    private final ObjectMapper mapper;
+    private final SessionFactory sessionFactory; // фабрика соединений
+    private final ObjectMapper mapper; // переводчик с джавы на джейсон
     private final CityDAO cityDAO;
     private final CountryDAO countryDAO;
     private final RedisClient redisClient;
@@ -36,11 +36,11 @@ public class Main {
         sessionFactory = HibernateUtil.getSessionFactory();
         cityDAO = new CityDAO(sessionFactory);
         countryDAO = new CountryDAO(sessionFactory);
-        mapper = new ObjectMapper();
+        mapper = new ObjectMapper(); // упаковщик JSON
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        redisClient = prepareRedisClient();
+        redisClient = prepareRedisClient(); // подключение к redis
     }
-
+    // проверка подключения к redis
     private RedisClient prepareRedisClient() {
         RedisClient redisClient = RedisClient.create(RedisURI.create("localhost", 6379));
         try (StatefulRedisConnection<String, String> connection = redisClient.connect()) {
@@ -50,21 +50,20 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        Main main = new Main();
+        Main main = new Main(); // собираем приложение
 
-        List<CityCountry> preparedData = main.fetchData();
-        main.pushToRedis(preparedData);
+        List<CityCountry> preparedData = main.fetchData(); // mySQL - DTO
+        main.pushToRedis(preparedData); // DTO - redis
 
-        main.sessionFactory.getCurrentSession().close();
-
+        // существующие id в БД(тестовые)
         List<Integer> ids = List.of(3, 2545, 123, 4, 189, 89, 3458, 1189, 10, 102);
 
         long startRedis = System.currentTimeMillis();
-        main.testRedisData(ids);
+        main.testRedisData(ids); // замер редис
         long stopRedis = System.currentTimeMillis();
 
         long startMysql = System.currentTimeMillis();
-        main.testMysqlData(ids);
+        main.testMysqlData(ids); // замер sql
         long stopMysql = System.currentTimeMillis();
 
         System.out.printf("%s:\t%d ms\n", "Redis", (stopRedis - startRedis));
@@ -74,29 +73,20 @@ public class Main {
     }
 
     private List<CityCountry> fetchData() {
-        long t0 = System.currentTimeMillis();
+        long t0 = System.currentTimeMillis(); // время старта
         List<CityCountry> result;
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
-
-            List<Country> countries = countryDAO.getAll();
+            List<Country> countries = countryDAO.getAll(); // все закгружаем в кэш
             System.out.println("Стран: " + countries.size());
 
-            int totalCount = cityDAO.getTotalCount();
-            int step = 500;
-            List<City> allCities = new ArrayList<>();
-            for (int i = 0; i < totalCount; i += step) {
+            int totalCount = cityDAO.getTotalCount(); //  все страны
+            int step = 500; // пачка в 500 городов
+            List<City> allCities = new ArrayList<>(); // лист для всех городов
+            for (int i = 0; i < totalCount; i += step) { // проходимся циклом
                 allCities.addAll(cityDAO.getItems(i, step));
             }
             System.out.println("Городов: " + totalCount);
-
-            for (String code : List.of("CHN", "RUS", "USA")) {
-                Country country = countries.stream()
-                        .filter(c -> c.getCode().equals(code))
-                        .findFirst()
-                        .orElseThrow();
-                System.out.println(country.getCode() + " → " + country.getContinent());
-            }
 
             result = transformData(allCities);   // строго до commit — сессия открыта
 
@@ -106,9 +96,10 @@ public class Main {
         return result;
     }
 
+    //превращаем entity плоский DTO, пока сессия открыта
     private List<CityCountry> transformData(List<City> allCities) {
         List<CityCountry> preparedData = new ArrayList<>();
-        for (City city : allCities) {
+        for (City city : allCities) { // копируем поля из entity в DTO
             CityCountry res = new CityCountry();
             res.setId(city.getId());
             res.setName(city.getName());

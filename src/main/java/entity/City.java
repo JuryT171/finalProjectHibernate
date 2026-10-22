@@ -3,15 +3,15 @@ package entity;
 import jakarta.persistence.*;
 
     @Entity
-    @Table(schema = "world", name = "city")
+    @Table(schema = "world", name = "city") // маппинг на таблицу city именно в схеме world
     public class City {
-        @Id
+        @Id // первич ключ
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Integer id;
 
         private String name;
-
-        @ManyToOne(fetch = FetchType.LAZY)
+        // связь «много городов одна страна,у Каира одна страна Египет, у Египта — много городов
+        @ManyToOne(fetch = FetchType.LAZY) //
         @JoinColumn(name = "country_id")
         private Country country;
 

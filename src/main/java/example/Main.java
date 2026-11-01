@@ -56,7 +56,7 @@ public class Main {
         main.pushToRedis(preparedData); // DTO - redis
 
         // существующие id в БД(тестовые)
-        List<Integer> ids = List.of(3, 2545, 123, 4, 189, 89, 3458, 1189, 10, 102);
+        List<Integer> ids = List.of(3, 2545,3563,3008, 123, 4,2341,2999, 189, 89, 3458,76, 1189, 10, 102, 106, 986,345,1567,2305,3123,3978,4000,564);
 
         long startRedis = System.currentTimeMillis();
         main.testRedisData(ids); // замер редис
